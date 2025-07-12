@@ -23,6 +23,7 @@ const Home = () => {
           search: search || undefined,
         };
         const response = await questionAPI.getQuestions(params);
+        console.log("Fetched questions:", response.data);
         setQuestions(response.data);
       } catch (error) {
         console.error("Failed to fetch questions", error);

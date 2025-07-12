@@ -1,7 +1,7 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
 import db from '../config/database.js';
-import { authenticateToken, optionalAuth } from '../middleware/auth.js';
+import { authenticateToken, optionalAuth, isAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 // Get all questions
@@ -163,5 +163,23 @@ router.post('/', authenticateToken, [
     res.status(500).json({ error: 'Server error' });
   }
 });
+
+router.delete('/:id', authenticateToken, isAdmin, async (req, res) => {
+  try {
+      const { id } = req.params;
+
+      const [result] = await db.execute('DELETE FROM questions WHERE id = ?', [id]);
+      
+      if (result.affectedRows === 0) {
+          return res.status(404).json({ error: 'Question not found' });
+      }
+
+      res.status(200).json({ message: 'Question deleted successfully by admin' });
+  } catch (error) {
+      console.error("Error deleting question:", error);
+      res.status(500).json({ error: 'Server error while deleting question' });
+  }
+});
+
 
 export default router;

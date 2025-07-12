@@ -9,11 +9,11 @@ import Spinner from '../components/Spinner';
 import VoteComponent from '../components/VoteComponent';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 import RichTextEditor from '../components/RichTextEditor';
-import { Check, User } from 'lucide-react';
+import { Check, User, Trash2 } from 'lucide-react'; // Import Trash2 icon
 
 const QuestionDetail = () => {
   const { id } = useParams();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth(); // 'user' object now contains the role
   const navigate = useNavigate();
 
   const [question, setQuestion] = useState(null);
@@ -62,10 +62,35 @@ const QuestionDetail = () => {
         await answerAPI.acceptAnswer(answerId);
         toast.success("Answer accepted!");
         fetchQuestion(); // Refetch to update state
-    } catch (error) {
+    } catch (error)        {
         toast.error(error.response?.data?.error || "Failed to accept answer.");
     }
   };
+
+  // --- ADMIN ACTIONS ---
+  const handleDeleteQuestion = async () => {
+    if (window.confirm("ADMIN ACTION: Are you sure you want to permanently delete this question and all its answers?")) {
+        try {
+            await questionAPI.deleteQuestion(id); // Assumes deleteQuestion exists in your api service
+            toast.success("Question deleted by admin.");
+            navigate('/');
+        } catch (error) {
+            toast.error(error.response?.data?.error || "Failed to delete question.");
+        }
+    }
+  }
+
+  const handleDeleteAnswer = async (answerId) => {
+    if (window.confirm("ADMIN ACTION: Are you sure you want to permanently delete this answer?")) {
+        try {
+            await answerAPI.deleteAnswer(answerId); // Assumes deleteAnswer exists in your api service
+            toast.success("Answer deleted by admin.");
+            fetchQuestion(); // Refetch to update the list of answers
+        } catch (error) {
+            toast.error(error.response?.data?.error || "Failed to delete answer.");
+        }
+    }
+  }
 
   if (loading) return <div className="text-center py-10"><Spinner size={48} /></div>;
   if (!question) return <div className="text-center text-xl font-semibold">Question not found.</div>;
@@ -76,7 +101,19 @@ const QuestionDetail = () => {
     <div className="max-w-5xl mx-auto">
       {/* Question Section */}
       <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">{question.title}</h1>
+        <div className="flex justify-between items-start mb-2">
+            <h1 className="text-3xl font-bold text-gray-800 ">{question.title}</h1>
+            {/* ADMIN: Delete Question Button */}
+            {user?.role === 'admin' && (
+                <button 
+                  onClick={handleDeleteQuestion} 
+                  title="Admin: Delete Question" 
+                  className="p-2 text-red-500 hover:bg-red-100 rounded-full transition-colors"
+                >
+                    <Trash2 size={20} />
+                </button>
+            )}
+        </div>
         <div className="text-sm text-gray-500 border-b pb-4 mb-4 flex space-x-4">
           <span>Asked: {format(new Date(question.created_at), 'MMM d, yyyy')}</span>
           <span>Viewed: {question.views} times</span>
@@ -140,7 +177,14 @@ const QuestionDetail = () => {
                   <div className="prose max-w-none text-gray-800">
                       <MarkdownRenderer markdown={answer.content} />
                   </div>
-                  <div className="mt-6 flex justify-end">
+                  <div className="mt-6 flex justify-between items-end">
+                      {/* ADMIN: Delete Answer Button */}
+                      {user?.role === 'admin' ? (
+                          <button onClick={() => handleDeleteAnswer(answer.id)} title="Admin: Delete Answer" className="p-2 text-red-500 hover:bg-red-100 rounded-lg text-xs flex items-center gap-1 transition-colors">
+                              <Trash2 size={14} /> Delete
+                          </button>
+                      ) : <div></div> /* Empty div to maintain space with justify-between */}
+                      
                       <div className="bg-gray-100 p-3 rounded-md text-sm">
                           <p className="text-gray-500">answered by</p>
                           <div className="flex items-center space-x-2 mt-1">

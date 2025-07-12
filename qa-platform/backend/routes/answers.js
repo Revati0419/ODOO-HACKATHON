@@ -1,7 +1,7 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
 import db from '../config/database.js';
-import { authenticateToken } from '../middleware/auth.js';
+import { authenticateToken, isAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -103,6 +103,23 @@ router.post('/:id/accept', authenticateToken, async (req, res) => {
     res.json({ message: 'Answer accepted successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
+  }
+});
+
+router.delete('/:id', authenticateToken, isAdmin, async (req, res) => {
+  try {
+      const { id } = req.params;
+
+      const [result] = await db.execute('DELETE FROM answers WHERE id = ?', [id]);
+      
+      if (result.affectedRows === 0) {
+          return res.status(404).json({ error: 'Answer not found' });
+      }
+
+      res.status(200).json({ message: 'Answer deleted successfully by admin' });
+  } catch (error) {
+      console.error("Error deleting answer:", error);
+      res.status(500).json({ error: 'Server error while deleting answer' });
   }
 });
 

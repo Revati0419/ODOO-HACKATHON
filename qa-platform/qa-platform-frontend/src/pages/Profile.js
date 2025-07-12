@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { authAPI } from '../services/api';
 import { format } from 'date-fns';
 import Spinner from '../components/Spinner';
-import { User, Calendar, Star } from 'lucide-react';
+import { User, Calendar, Star, Shield } from 'lucide-react'; // Import Shield icon
 
 const Profile = () => {
   const [profile, setProfile] = useState(null);
@@ -37,6 +37,14 @@ const Profile = () => {
           </div>
         </div>
         <div className="mt-8 border-t pt-6 space-y-4">
+          {/* Role Display */}
+          <div className="flex items-center text-gray-700">
+            <Shield className={`w-5 h-5 mr-3 ${profile.role === 'admin' ? 'text-primary-600' : 'text-gray-500'}`} />
+            <span className="font-semibold">Role:</span>
+            <span className="ml-2 capitalize px-2 py-0.5 rounded-full text-sm font-medium ${profile.role === 'admin' ? 'bg-primary-100 text-primary-800' : 'bg-gray-100 text-gray-800'}">
+                {profile.role}
+            </span>
+          </div>
           <div className="flex items-center text-gray-700">
             <Star className="w-5 h-5 mr-3 text-yellow-500" />
             <span className="font-semibold">Reputation:</span>
