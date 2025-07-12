@@ -3,15 +3,20 @@ import mysql from 'mysql2';
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'qa_platform',
+  password: process.env.DB_PASS || 'Patare@123',
+  database: process.env.DB_NAME || 'qa_platform1',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
 });
 
-// Export as default
-export default pool.promise();
-
-// Alternative if you prefer named exports:
-// export const db = pool.promise();
+pool.getConnection((err, connection) => {
+    if (err) {
+      console.error('Database connection failed:', err);
+    } else {
+      console.log('Database connected successfully');
+      connection.release();
+    }
+  });
+  
+  export default pool.promise();
