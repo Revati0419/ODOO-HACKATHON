@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for react-select */
+.react-select-container .react-select__control {
+  border-color: #d1d5db;
+}
+.react-select-container .react-select__control--is-focused {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px #3b82f6;
+}
+
+/* Custom styles for react-quill */
+.ql-editor {
+  min-height: 150px;
+}
